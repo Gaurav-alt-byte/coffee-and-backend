@@ -1,0 +1,99 @@
+import mongoose from "mongoose"
+import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt";
+
+
+const UserModel_Schema = new mongoose.Schema({
+
+    username : {
+        type : String,
+        required : true,
+        unique : true,
+        lowercase : true,
+        trim : true,
+        index : true, // this optimise the searching in the database
+    },
+    email : {
+        type:String,
+        required:true,
+        unique:true,
+        lowercase : true,
+        trim : true,
+    },
+    fullname : {
+        type :String,
+        required : true,
+        index:true,
+    },
+    avatar : {
+        type : String , // cloudnary url
+        required : true,
+        unique : true,
+        default : 'default-avatar-png' // add a default avatar png to the user if no image is provided byt the user
+    },
+    password : {
+        type : String,
+        required:[true , 'password is required'],
+        min : ['8' , "password should be minimum 8 characters"]
+    },
+    cover_image : {
+        type : String,
+        required:true,
+    },
+    watch_history : [
+        {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "Videos",
+            required:true,
+        }
+    ]
+
+} , {timestamps : true});
+
+// we cannot directly encrypt the password so that why we use the mongoose hooks
+
+// there are few operation that we want to perform before actually saving the data to the database 
+// this can be done using the middlewares / hooks of the mongoose
+
+
+// mongoose allows us to write the methods and use middlewares
+
+// so we will also write some methods to check wheter the passwords is correct or not
+
+// avoid using the arrow function as in the arrow function the this keyword do not hold the refrence of the this keyword 
+
+UserModel_Schema.pre("save", async function (next) {
+    if(this.isModified("password"))
+    {
+        this.password =  await bcrypt.hash(this.password , 10);
+    }
+    next();
+})
+
+
+UserModel_Schema.methods.isPasswordCorrect = async function (password) {
+    return await bcrypt.compare(password , this.password);
+}
+
+UserModel_Schema.methods.generateAccessToken = function () {
+    return jwt.sign({
+        _id : this._id,
+        email:this.email,
+        fullname : this.fullname,
+        username:this.username,
+    } , process.env.ACCESS_TOKEN_SECRET , {
+        expiresIn : process.env.ACCESS_TOKEN_EXPIRY,
+    })
+}
+
+UserModel_Schema.methods.generaterefreshToken = function () {
+    return jwt.sign({
+        _id : this._id,
+        email:this.email,
+        fullname : this.fullname,
+        username:this.username,
+    } , process.env.REFRESH_TOKEN_SECRET , {
+        expiresIn : process.env.REFRESH_TOKEN_SECRET,
+    })
+}
+ export const User_Model = mongoose.model("User_Model" , UserModel_Schema);
