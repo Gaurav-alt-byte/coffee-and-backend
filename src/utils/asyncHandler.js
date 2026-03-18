@@ -1,0 +1,29 @@
+
+// const asyncHandler = (requestHandler) =>{
+//     return (req , res , next)=>
+//     {
+//         Promise.resolve(requestHandler(req , res ,next)).catch((error) =>{
+//             next(error);
+//         })
+//     };
+// };
+
+// export {asyncHandler}
+
+
+
+// another way to write the asyncHandler 
+const asyncHandler_2 = (requestHandler)=>{
+    return async (req , res , next )=>{
+        try{
+            await requestHandler(req , res , next);
+            console.log("task is established");
+        }
+        catch(error)
+        {
+            throw Error("something went wrong " , error);
+        }
+    }
+}
+
+export {asyncHandler_2}
