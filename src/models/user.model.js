@@ -46,7 +46,10 @@ const UserModel_Schema = new mongoose.Schema({
             ref : "Videos",
             required:true,
         }
-    ]
+    ],
+    refreshToken : {
+        type : String,
+    }
 
 } , {timestamps : true});
 
