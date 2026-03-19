@@ -21,7 +21,7 @@ const asyncHandler_2 = (requestHandler)=>{
         }
         catch(error)
         {
-            throw Error("something went wrong " , error);
+            next(error);
         }
     }
 }

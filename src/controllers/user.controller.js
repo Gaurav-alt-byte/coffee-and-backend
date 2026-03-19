@@ -3,7 +3,7 @@ import { User_Model } from "../models/user.model.js"
 import {APIError}  from "../utils/APIError.js"
 import { fileUploader } from "../utils/cloudinary.js"
 import { APIresponse } from "../utils/APIresponse.js"
-const registerUser = asyncHandler_2(async(req , res) =>{
+const registerUser = asyncHandler_2(async(req , res , next) =>{
     // get the user data from the frontend 
     // validation of the data - not empty
     // check if user already existed 
@@ -21,7 +21,7 @@ const registerUser = asyncHandler_2(async(req , res) =>{
 
     // validating the data 
 
-    if([email , username , fullname , password].select((field) =>{
+    if([email , username , fullname , password].some((field) =>{
         if(field?.trim() === "")
         {
             return true;
@@ -42,7 +42,11 @@ const registerUser = asyncHandler_2(async(req , res) =>{
     }
 
     const avatarlocalpath =req.files?.avatar[0]?.path;
-    const coverimagelocalpath = req.files?.cover_image[0]?.path;
+    let coverimagelocalpath;
+    if(req.files && Array.isArray(req.files.cover_image) && 0 < req.files.cover_image.length)
+    {
+        coverimagelocalpath = req.files.cover_image[0].path;
+    }
 
     if(!avatarlocalpath)
     {
@@ -50,32 +54,29 @@ const registerUser = asyncHandler_2(async(req , res) =>{
     }
 
     const avatar_cloudinary = await fileUploader(avatarlocalpath);
+    const cover_image_cloudinary = await fileUploader(coverimagelocalpath);    
     if(!avatar_cloudinary)
     {
         throw new APIError(500 , "internal server error");
     }
-    if(coverimagelocalpath)
-    {
-        const cover_image_cloudinary = await fileUploader(coverimagelocalpath);
-    }
-
     const created_user =await User_Model.create({
         username:username.toLowerCase(),
         fullname,
         avatar : avatar_cloudinary.url,
-        cover_image: cover_image_cloudinary?.url,
+        cover_image: cover_image_cloudinary?.url || "",
         email,
         password,
     });
+    console.log(created_user);
     const creation_check  = await User_Model.findById(created_user._id).select(
         "-password -refreshToken"
     );
-    if(creation_check === false)
+    if(!creation_check)
     {
         throw new APIError(500 , "internal server error");
     }
-    return res.Status(200).json(
-        new APIresponse(200 ,created_user, "user created successfully")
+    return res.status(200).json(
+        new APIresponse(200 ,creation_check, "user created successfully")
     )
 })
 

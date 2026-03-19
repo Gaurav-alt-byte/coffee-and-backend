@@ -34,11 +34,9 @@ const UserModel_Schema = new mongoose.Schema({
     password : {
         type : String,
         required:[true , 'password is required'],
-        min : ['8' , "password should be minimum 8 characters"]
     },
     cover_image : {
         type : String,
-        required:true,
     },
     watch_history : [
         {
@@ -70,7 +68,6 @@ UserModel_Schema.pre("save", async function (next) {
     {
         this.password =  await bcrypt.hash(this.password , 10);
     }
-    next();
 })
 
 
