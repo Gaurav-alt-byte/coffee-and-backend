@@ -41,8 +41,8 @@ const registerUser = asyncHandler_2(async(req , res) =>{
         throw new APIError(409 , "user preexisted in the system with same user name or same email");
     }
 
-    const avatarlocalpath =req.files?.avatar[0].path;
-    const coverimagelocalpath = req.files.coverimage[0].path;
+    const avatarlocalpath =req.files?.avatar[0]?.path;
+    const coverimagelocalpath = req.files?.cover_image[0]?.path;
 
     if(!avatarlocalpath)
     {
