@@ -92,8 +92,8 @@ UserModel_Schema.methods.generaterefreshToken = function () {
         email:this.email,
         fullname : this.fullname,
         username:this.username,
-    } , process.env.REFRESH_TOKEN_SECRET , {
-        expiresIn : process.env.REFRESH_TOKEN_SECRET,
+    } , process.env.REFRESH_TOKEN_SECRET, {
+        expiresIn : process.env.REFRESH_TOKEN_EXPIRY,
     })
 }
  export const User_Model = mongoose.model("User_Model" , UserModel_Schema);

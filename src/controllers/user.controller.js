@@ -3,6 +3,24 @@ import { User_Model } from "../models/user.model.js"
 import {APIError}  from "../utils/APIError.js"
 import { fileUploader } from "../utils/cloudinary.js"
 import { APIresponse } from "../utils/APIresponse.js"
+
+
+const accessandrefreshgenerator = async function (user_id){
+    try{
+        const user_from_db = await User_Model.findById(user_id);
+        const access_token = user_from_db.generateAccessToken();
+        const refresh_token  = user_from_db.generaterefreshToken();
+        user_from_db.refreshToken = refresh_token;
+        await user_from_db.save({validateBeforeSave : false})
+        return {access_token , refresh_token};
+    }
+    catch(error)
+    {
+        throw new APIError(500  , error.message ||"internal server error while generating token");
+    }
+}
+
+
 const registerUser = asyncHandler_2(async(req , res , next) =>{
     // get the user data from the frontend 
     // validation of the data - not empty
@@ -80,4 +98,51 @@ const registerUser = asyncHandler_2(async(req , res , next) =>{
     )
 })
 
-export {registerUser}
+
+const login_user = asyncHandler_2(async(req ,res, next) =>{
+
+    // algorithm to login the user 
+    // take the email and  password from the user
+    // perform the validation on the data
+    // search the database
+    // get the information from the database if found
+    // if not found then redirect to the register route or ask to enter the correct email and password
+    // send the response to the frontend
+
+    const {email , password , username} = req.body;
+    if(!email && !username)
+    {
+        throw new APIError(409 , "username or email is required");
+    }
+    if(!password)
+    {
+        throw new APIError(409 , "password is required");
+    }
+    const db_check  = await User_Model.findOne({
+        $or : [{email} , {username}],
+    });
+    if( !db_check)
+    {
+        throw new APIError("404" , "user not registered");
+    }
+    const password_check = await db_check.isPasswordCorrect(password);
+    if(!password_check)
+    {
+        throw new APIError(401 , "password mismatch");
+    }
+    const {access_token , refresh_token} = await accessandrefreshgenerator(db_check._id);
+    const loggedInuser = await User_Model.findById(db_check._id).select("-password -refreshToken");
+    const options = {
+        httpOnly : true,
+        secure : true,
+    }
+    return res.status(200).cookie("accessToken" , access_token , options)
+    .cookie("refreshToken" ,refresh_token , options).json(
+        new APIresponse(200 , "user logged in sucessfully",{user : loggedInuser , access_token , refresh_token})
+    );
+});
+
+const logoutuser = asyncHandler_2(async function(req , res, next) {
+
+})
+export {registerUser , login_user}
