@@ -143,6 +143,32 @@ const login_user = asyncHandler_2(async(req ,res, next) =>{
 });
 
 const logoutuser = asyncHandler_2(async function(req , res, next) {
+    //we will add a middleware to access the user so that logout can be performed
+    // in that method we will add a user to the request so that we can access the user here 
+
+    const user_after_authentication = req.user;
+    const user_id = user_after_authentication._id;
+    const user_refrence = await User_Model.findByIdAndDelete(user_id ,
+        {
+            $set : {
+                refreshToken : undefined,
+            }
+        },
+        {
+            new : true,
+        }
+    );
+    const options = {
+        httpOnly : true,
+        secure : true,
+    }
+    return res
+    .status(201)
+    .clearCookie("accessToken" ,options)
+    .clearCookie("refreshToken" , options)
+    .json(
+        new APIresponse(200 , user_after_authentication , "user logged out successfully")
+    );
 
 })
-export {registerUser , login_user}
+export {registerUser , login_user , logoutuser};
