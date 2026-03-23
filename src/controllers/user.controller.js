@@ -3,6 +3,7 @@ import { User_Model } from "../models/user.model.js"
 import {APIError}  from "../utils/APIError.js"
 import { fileUploader } from "../utils/cloudinary.js"
 import { APIresponse } from "../utils/APIresponse.js"
+import jwt from "jsonwebtoken"
 
 
 const accessandrefreshgenerator = async function (user_id){
@@ -146,9 +147,7 @@ const logoutuser = asyncHandler_2(async function(req , res, next) {
     //we will add a middleware to access the user so that logout can be performed
     // in that method we will add a user to the request so that we can access the user here 
 
-    const user_after_authentication = req.user;
-    const user_id = user_after_authentication._id;
-    const user_refrence = await User_Model.findByIdAndDelete(user_id ,
+    const user_refrence = await User_Model.findByIdAndUpdate(req.user._id ,
         {
             $set : {
                 refreshToken : undefined,
@@ -167,8 +166,50 @@ const logoutuser = asyncHandler_2(async function(req , res, next) {
     .clearCookie("accessToken" ,options)
     .clearCookie("refreshToken" , options)
     .json(
-        new APIresponse(200 , user_after_authentication , "user logged out successfully")
+        new APIresponse(200 ,{}, "user logged out successfully")
     );
 
+});
+
+const refreshaccesstoken = asyncHandler_2(async function(req , res , next) {
+    try
+    {
+        const incomingrefresh_token = req.cookies.refreshToken||req.body.refreshToken;
+        if(!incomingrefresh_token)
+        {
+            throw new APIError(401 , "unauthorized request");
+        }
+        const decrypted_token = jwt.verify(incomingrefresh_token , process.env.REFRESH_TOKEN_SECRET);
+        if(!decrypted_token)
+        {
+            throw new APIError(401 , "unauthorized access");
+        }
+        const user_refrence = await User_Model.findById(decrypted_token._id);
+        if(!user_refrence)
+        {
+            throw new APIError(401 , "invalid refresh token");
+        }
+        if(user_refrence.refreshToken !== incomingrefresh_token){
+            throw new APIError(401 , "refresh token mismatch");
+        }
+
+        const options = {
+
+            httpOnly : true,
+            secure : true,
+        }
+        const {access_token , new_refresh_token} = await accessandrefreshgenerator(user_refrence._id);
+        return res.status(200)
+        .cookie("accessToken" , access_token , options)
+        .cookie("refreshToken" ,new_refresh_token , options)
+        .json(
+            new APIresponse(200 , "token refreshed successfully",{ access_token , refreshToken : new_refresh_token})
+        );
+    }
+    catch(error)
+    {
+        throw new APIError(401 , error.message || "user not authenticated");
+    }
+
 })
-export {registerUser , login_user , logoutuser};
+export {registerUser , login_user , logoutuser , refreshaccesstoken};
