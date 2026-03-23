@@ -212,4 +212,127 @@ const refreshaccesstoken = asyncHandler_2(async function(req , res , next) {
     }
 
 })
-export {registerUser , login_user , logoutuser , refreshaccesstoken};
+
+const changecurrentpassword = asyncHandler_2(async function (req , res , next) {
+    const {oldpassword , newPassword} = req.body;
+    const user_refrence = await User_Model.findById(user._id);
+    const password_check = await user_refrence.isPasswordCorrect(oldpassword);
+    if(!password_check)
+    {
+        throw new APIError(401 ,"unauthorized access");
+    }
+    user_refrence.password = newPassword;
+    await user_refrence.save({validateBeforeSave : false});
+    return res.status(200).json(
+        new APIresponse(200 , {} , "password changed successfully")
+    )
+})
+
+
+const getUser = asyncHandler_2(async function (req,res, next) {
+    return res.status(200).json(
+        200 , req.user , "current user is fetched successfully"
+    )
+})
+
+const updateaccountDetails = asyncHandler_2(async function (req , res , next){
+    const {email , fullname} = req.body;
+    if(!email && !fullname)
+    {
+        throw new APIError(401 ,"all the fileds are required");
+    }
+    const user_refrence = User_Model.findByIdAndUpdate(req.user._id , 
+        {
+            $set : {
+                fullname:fullname,
+                email:email,
+            }
+        },
+        {
+            new : true,
+        }
+    ).select("-password");
+    return res.status(200).json(
+        new APIresponse(200 , user_refrence , "user details updated successfully")
+    )
+})
+
+const UpdateUserAvatar = asyncHandler_2(async function (req , res , next) {
+    try
+    {
+        const localfilepath_newAvatar = req.file.path;
+        if(!localfilepath_newAvatar)
+        {
+            throw new APIError(404 , "new imaage is needed");
+        }
+        const new_avatar_cloudinary = await fileUploader(localfilepath_newAvatar);
+        if(!new_avatar_cloudinary)
+        {
+            throw new APIError(500 , "internal server error image upload failed");
+        }
+        const user_refrence = await User_Model.findByIdAndUpdate(req.user._id ,
+            {
+                $set : {
+                    avatar : new_avatar_cloudinary.url,
+                }
+            },
+
+            {
+                new : true
+            }
+        ).select("-password -refreshToken");
+        return res.status(201).json(
+            new APIresponse(200 , user_refrence , "image updated successfully")
+        )
+    }
+    catch(error)
+    {
+        throw new APIError(500 ,"imageUpdationFailed");
+    }
+
+});
+
+const updateUserCoverImage = asyncHandler_2(async function (req, res, next) {
+
+    try
+    {
+        const localfilepath_newcover = req.file.path;
+        if(!localfilepath_newcover)
+        {
+            throw new APIError(404 , "new image is needed");
+        }
+        const new_CoverImage_cloudinary = await fileUploader(localfilepath_newcover);
+        if(!new_CoverImage_cloudinary)
+        {
+            throw new APIError(500 , "internal server error image upload failed");
+        }
+        const user_refrence = await User_Model.findByIdAndUpdate(req.user._id ,
+            {
+                $set : {
+                    avatar : new_CoverImage_cloudinary.url,
+                }
+            },
+
+            {
+                new : true
+            }
+        ).select("-password -refreshToken");
+        return res.status(201).json(
+            new APIresponse(200 , user_refrence , "image updated successfully")
+        )
+    }
+    catch(error)
+    {
+        throw new APIError(500 ,"imageUpdationFailed");
+    }
+})
+export {registerUser ,
+    login_user,
+    logoutuser,
+    refreshaccesstoken,
+    changecurrentpassword,
+    getUser,
+    updateaccountDetails,
+    UpdateUserAvatar,
+    updateUserCoverImage,
+};
