@@ -326,6 +326,76 @@ const updateUserCoverImage = asyncHandler_2(async function (req, res, next) {
         throw new APIError(500 ,"imageUpdationFailed");
     }
 })
+
+const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
+    const {username} = req.params;
+    if(!username?.trim())
+    {
+        throw new APIError(400 , "username is missing");
+    }
+    const channel = await User_Model.aggregate([
+        {
+            $match : {
+                username : username?.toLowerCase()
+            },
+        },
+        {
+            $lookup : {
+                from : "Subscription",
+                localField :"_id",
+                foreignField : "channel",
+                as : "Subsribers"
+            }
+        },
+        {
+            $lookup : {
+                from : "Subscription",
+                localField :"_id",
+                foreignField : "subscriber",
+                as : "SubscribedTo",
+            }
+        },
+        {
+            $addFields : {
+                SubscribersCount: {
+                    $size : "$Subscribers",
+                },
+                SubscribedToCount: {
+                    $size : "$SubscribedTo",
+                },
+                isSubscribed : {
+                    $cond : {
+                        if :{ $in : [req.user?._id , "$Subscribers.subscriber"]},
+                        then : true,
+                        else : false,
+                    }
+                }
+            }
+        },
+        {
+            $project:{
+                fullname:1,
+                email : 1,
+                cover_image :1,
+                avatar : 1,
+                SubscribedToCount:1,
+                SubscribersCount:1,
+                password:0,
+                refreshToken:0,
+                isSubscribed:1,
+                username :1,
+            }
+        }
+    ])
+
+    if(!channel?.length)
+    {
+        throw new APIError(404 , "User not found")
+    }
+    return res.status(200).json(
+        new APIresponse(200 , channel[0] , "user channel fetched successfully")
+    )
+});
 export {registerUser ,
     login_user,
     logoutuser,
@@ -335,4 +405,5 @@ export {registerUser ,
     updateaccountDetails,
     UpdateUserAvatar,
     updateUserCoverImage,
+    getuserchannelprofile,
 };
