@@ -150,8 +150,8 @@ const logoutuser = asyncHandler_2(async function(req , res, next) {
 
     const user_refrence = await User_Model.findByIdAndUpdate(req.user._id ,
         {
-            $set : {
-                refreshToken : undefined,
+            $unset : {
+                refreshToken : 1,
             }
         },
         {
@@ -216,7 +216,7 @@ const refreshaccesstoken = asyncHandler_2(async function(req , res , next) {
 
 const changecurrentpassword = asyncHandler_2(async function (req , res , next) {
     const {oldpassword , newPassword} = req.body;
-    const user_refrence = await User_Model.findById(user._id);
+    const user_refrence = await User_Model.findById(req.user._id);
     const password_check = await user_refrence.isPasswordCorrect(oldpassword);
     if(!password_check)
     {
@@ -231,8 +231,9 @@ const changecurrentpassword = asyncHandler_2(async function (req , res , next) {
 
 
 const getUser = asyncHandler_2(async function (req,res, next) {
+    const user_refrence = await User_Model.findById(req.user._id).select("-password -refreshToken")
     return res.status(200).json(
-        200 , req.user , "current user is fetched successfully"
+        new APIresponse(200 , user_refrence , "current user is fetched successfully")
     )
 })
 
@@ -424,9 +425,6 @@ const getWatchHistory = asyncHandler_2(async function(req , res , next) {
                                         email:1,
                                         avatar:1,
                                         cover_image:1,
-                                        password:0,
-                                        refreshToken:0,
-                                        watch_history :0,
 
                                     }
                                 }
