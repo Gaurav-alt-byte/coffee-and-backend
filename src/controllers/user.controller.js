@@ -4,6 +4,7 @@ import {APIError}  from "../utils/APIError.js"
 import { fileUploader } from "../utils/cloudinary.js"
 import { APIresponse } from "../utils/APIresponse.js"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 
 
 const accessandrefreshgenerator = async function (user_id){
@@ -341,15 +342,15 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
         },
         {
             $lookup : {
-                from : "Subscription",
+                from : "subscriptions",
                 localField :"_id",
                 foreignField : "channel",
-                as : "Subsribers"
+                as : "Subscribers"
             }
         },
         {
             $lookup : {
-                from : "Subscription",
+                from : "subscriptions",
                 localField :"_id",
                 foreignField : "subscriber",
                 as : "SubscribedTo",
@@ -365,7 +366,7 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
                 },
                 isSubscribed : {
                     $cond : {
-                        if :{ $in : [req.user?._id , "$Subscribers.subscriber"]},
+                        if :{ $in : [new mongoose.Types.ObjectId(req.user._id) , "$Subscribers.subscriber"]},
                         then : true,
                         else : false,
                     }
@@ -380,8 +381,6 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
                 avatar : 1,
                 SubscribedToCount:1,
                 SubscribersCount:1,
-                password:0,
-                refreshToken:0,
                 isSubscribed:1,
                 username :1,
             }
@@ -396,6 +395,58 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
         new APIresponse(200 , channel[0] , "user channel fetched successfully")
     )
 });
+
+
+const getWatchHistory = asyncHandler_2(async function(req , res , next) {
+    const user_refrence = await User_Model.aggregate([
+        {
+            $match : {
+                _id : new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $lookup:{
+                from:"videos",
+                localField : "watch_history",
+                foreignField: "_id",
+                as : "watched_Videos",
+                pipeline : [
+                    {
+                        $lookup :{
+                            from : "user_models",
+                            localField : "owner",
+                            foreignField : "_id",
+                            as : "owner",
+                            pipeline : [
+                                {
+                                    $project : {
+                                        fullname:1,
+                                        email:1,
+                                        avatar:1,
+                                        cover_image:1,
+                                        password:0,
+                                        refreshToken:0,
+                                        watch_history :0,
+
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields :{
+                            owner : {$first : "$owner"}
+                        }
+                    }
+                ]
+            }
+        }
+    ])
+
+    return res.status(200).json(
+        new APIresponse(200 , user_refrence[0].watched_Videos , "History fetched successfully")
+    )
+})
 export {registerUser ,
     login_user,
     logoutuser,
@@ -406,4 +457,5 @@ export {registerUser ,
     UpdateUserAvatar,
     updateUserCoverImage,
     getuserchannelprofile,
+    getWatchHistory,
 };
