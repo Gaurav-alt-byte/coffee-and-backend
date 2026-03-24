@@ -1,7 +1,7 @@
 import mongoose, { Schema, Types } from "mongoose";
 
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
-const Video_Schema  = mongoose.Schema({
+const Video_Schema  = new mongoose.Schema({
 
     video_file : {
         type : String, // cloudnary url
