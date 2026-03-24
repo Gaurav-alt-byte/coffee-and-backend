@@ -88,15 +88,15 @@ const viewUpdater = asyncHandler_2(async function(req , res , next) {
         {
             new : true,
         }
-    )
+    ).select("-password -refreshToken")
     console.log(user_refrence);
     return res.status(200).json(
-        new APIresponse(200 , {video_info : video_refrence , user : user_refrence} ,"views and History Updated SuccessFully")
+        new APIresponse(200 , {video_info : video_refrence , user_history : user_refrence.watch_history} ,"views and History Updated SuccessFully")
     )
 })
 
 const feedGenerator = asyncHandler_2(async function(req , res, next){
-    const Videos_avail = await (Video.find({is_published : true} )).sort({createdAt : -1}).populate("owner" , "username avatar");
+    const Videos_avail = await (Video.find({is_published : true} )).sort({createdAt : -1}).populate("owner" , "username avatar").select("-video_file");
     console.log(Videos_avail);
     if(!Videos_avail)
     {
@@ -161,7 +161,7 @@ const allUploads = asyncHandler_2(async function (req, res, next) {
         }
         console.log(allUploads);
         return res.status(200).json(
-            new APIresponse(200 , allUploads[0], "all the updates hase been fetched successfully")
+            new APIresponse(200 , allUploads[0], "all the uploads has been fetched successfully")
         )
     }
     catch(error)
