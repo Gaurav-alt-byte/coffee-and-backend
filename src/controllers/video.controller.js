@@ -6,6 +6,7 @@ import { Video } from "../models/video.model.js";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 import mongoose from "mongoose";
 import { User_Model } from "../models/user.model.js";
+import { getWatchHistory } from "./user.controller.js";
 
 const video_uploader = asyncHandler_2(async function (req , res, next) {
     // first authenticate the user using the authentication middleware
@@ -49,6 +50,7 @@ const video_uploader = asyncHandler_2(async function (req , res, next) {
     {
         throw new APIError(500 , "internal server error");
     }
+
     return res.status(200).json(
         new APIresponse(200 , created_video , "Video Uploaded successfully")
     )
@@ -56,20 +58,15 @@ const video_uploader = asyncHandler_2(async function (req , res, next) {
 
 const viewUpdater = asyncHandler_2(async function(req , res , next) {
 
-
-    // extract the video id from the url
-    // there can be 2 possiblites that the user can be logged in or not 
-    // if the user is logged in then also update the watch history of the user
-    // else just change the count of the views
     const{VideoId} =req.params;
     if(!VideoId)
     {
         throw new APIError(404 , "Video not found")
     }
-    const video_refrence = await Video.findByIdAndUpdate(VideoId , 
+    const video_refrence = await Video.findByIdAndUpdate(VideoId ,
         {
             $inc : {
-                views : 1,
+                views:1
             }
         },
         {
@@ -78,13 +75,13 @@ const viewUpdater = asyncHandler_2(async function(req , res , next) {
     )
     if(!req.user)
     {
-        return res.status(200).json(
-            new APIresponse(200 , video_refrence.views , "views incremented")
+        return res.status(201).json(
+            new APIresponse(200 ,video_refrence , "views updated successfully")
         )
     }
-    const user_refrence = await User_Model.findByIdAndUpdate(req.user._id ,
+    const user_refrence = await User_Model.findByIdAndUpdate(req.user._id,
         {
-            $push : {
+            $addToSet :{
                 watch_history : VideoId,
             }
         },
@@ -94,11 +91,87 @@ const viewUpdater = asyncHandler_2(async function(req , res , next) {
     )
     console.log(user_refrence);
     return res.status(200).json(
-        new APIresponse(200 , {video_refrence:video_refrence , user : user_refrence} ,"views and History Updated SuccessFully")
+        new APIresponse(200 , {video_info : video_refrence , user : user_refrence} ,"views and History Updated SuccessFully")
     )
 })
 
+const feedGenerator = asyncHandler_2(async function(req , res, next){
+    const Videos_avail = await (Video.find({is_published : true} )).sort({createdAt : -1}).populate("owner" , "username avatar");
+    console.log(Videos_avail);
+    if(!Videos_avail)
+    {
+        throw new APIError(500 , "internal server error feed load failed");
+    }
+    return res.status(200).json(
+        new APIresponse(200 ,"feed fetched successfully" ,Videos_avail)
+    )
+})
+
+const allUploads = asyncHandler_2(async function (req, res, next) {
+    try
+    {
+        const allUploads = await Video.aggregate([
+            {
+                $match : {
+                    owner : new mongoose.Types.ObjectId(req.user._id)
+                }
+            },
+            {
+                $sort :{
+                    createdAt : -1
+                }
+            },
+            {
+                $lookup :{
+                    from : "user_models",
+                    localField : "owner",
+                    foreignField : "_id",
+                    as : "Video_owner",
+                    pipeline : [
+                        {
+                            $project :{
+                                username:1,
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $addFields :{
+                    ownerDetails : {$first : "$Video_owner"}
+                }
+            },
+            {
+                $project :{
+                    createdAt:1,
+                    is_published:1,
+                    tittle:1,
+                    description:1,
+                    ownerDetails:1,
+                    thumbnail:1,
+                    video_file:1,
+                    views:1,
+                    duration:1,
+                }
+            }
+        ])
+        if(!allUploads)
+        {
+            throw new APIError(404 , "user has not uploaded anything yet");
+        }
+        console.log(allUploads);
+        return res.status(200).json(
+            new APIresponse(200 , allUploads[0], "all the updates hase been fetched successfully")
+        )
+    }
+    catch(error)
+    {
+        throw new APIError(500 , "internal server error upload fetched failed");
+    }
+})
 export {
     video_uploader,
-    viewUpdater
+    viewUpdater,
+    feedGenerator,
+    allUploads
 }
