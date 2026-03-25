@@ -5,17 +5,15 @@ const like_Schema = new mongoose.Schema({
         ref:"User_Model",
         required:true,
     },
-    video_liked :{
+    content_id : {
         type : mongoose.Schema.Types.ObjectId,
-        ref :"Video",
+        refPath:"OnModel",
+        required:true,
     },
-    tweet_liked :{
-        type : Mongoose.Schema.Types.ObjectId,
-        ref : "Tweets",
-    },
-    comment_liked : {
-        type : Mongoose.Schema.Types.ObjectId,
-        ref :"Comment_Model",
+    OnModel :{
+        type:String,
+        required:true,
+        enum :["Video" ,"Tweets" ,"Comment_Model"]
     }
 } , {timestamps : true});
 

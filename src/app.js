@@ -26,9 +26,12 @@ import Userrouter from "./routes/user.routes.js"
 
 import Videorouter from "./routes/video.routes.js"
 
+import Likerouter from "./routes/like.routes.js"
+
 
 // routes declaration 
 
 app.use("/api/v1/users" , Userrouter);
 app.use("/api/v1/videos" , Videorouter);
+app.use("/api/v1/likes" , Likerouter);
 export {app}

@@ -41,6 +41,11 @@ const Video_Schema  = new mongoose.Schema({
     is_published : {
         type : Boolean,
         required:true,
+    },
+    like_counts : {
+        type:Number,
+        required:true,
+        default:0,
     }
 } , {timestamps : true});
 
