@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { changecurrentpassword, getUser, getuserchannelprofile, getWatchHistory, refreshaccesstoken, registerUser, updateaccountDetails, UpdateUserAvatar, updateUserCoverImage } from "../controllers/user.controller.js";
+import { changecurrentpassword, clearHistory, getUser, getuserchannelprofile, getWatchHistory, refreshaccesstoken, registerUser, updateaccountDetails, UpdateUserAvatar, updateUserCoverImage } from "../controllers/user.controller.js";
 import { login_user } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { authentication } from "../middlewares/auth.middleware.js";
@@ -31,5 +31,6 @@ router.route("/current-user").get(authentication , getUser);
 router.route("/Update-details").patch(authentication , updateaccountDetails);
 router.route("/channel/:username").get(authentication , getuserchannelprofile);
 router.route("/history").get(authentication , getWatchHistory);
+router.route("/clear-history").patch(authentication , clearHistory)
 
 export default router;

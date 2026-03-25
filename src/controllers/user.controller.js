@@ -465,6 +465,31 @@ const getWatchHistory = asyncHandler_2(async function(req , res , next) {
         )
     )
 })
+
+const clearHistory = asyncHandler_2(async function(req, res, next){
+    if(!req.user)
+    {
+        throw new APIError(401 , "unauthorized error");
+    }
+    const user_refrence = await User_Model.findByIdAndUpdate(req.user._id ,
+        {
+            $set : {
+                watch_history : [],
+            }
+        },
+        {
+            new : true,
+        }
+    )
+    if(!user_refrence)
+    {
+        throw new APIError(404 , "no such user is found");
+    }
+    return res.status(200).json(
+        new APIresponse(200 , "watch history cleared successfully" , user_refrence.watch_history)
+    )
+})
+
 export {registerUser ,
     login_user,
     logoutuser,
@@ -476,4 +501,5 @@ export {registerUser ,
     updateUserCoverImage,
     getuserchannelprofile,
     getWatchHistory,
+    clearHistory,
 };
