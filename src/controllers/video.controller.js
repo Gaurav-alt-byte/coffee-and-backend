@@ -108,11 +108,11 @@ const allUploads = asyncHandler_2(async function (req, res, next) {
                     owner : new mongoose.Types.ObjectId(req.user._id)
                 }
             },
-            {
-                $sort :{
-                    createdAt : -1
-                }
-            },
+            // {
+            //     $sort :{
+            //         createdAt : -1
+            //     }
+            // },
             {
                 $lookup :{
                     from : "user_models",
@@ -153,7 +153,7 @@ const allUploads = asyncHandler_2(async function (req, res, next) {
         }
         console.log(allUploads_video);
         return res.status(200).json(
-            new APIresponse(200 ,"all the uploads has been fetched successfully",{upload_data :allUploads_video[0]})
+            new APIresponse(200 ,"all the uploads has been fetched successfully",{upload_data :allUploads_video})
         )
     }
     catch(error)

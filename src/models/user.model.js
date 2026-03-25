@@ -28,7 +28,6 @@ const UserModel_Schema = new mongoose.Schema({
     avatar : {
         type : String , // cloudnary url
         required : true,
-        unique : true,
         default : 'default-avatar-png' // add a default avatar png to the user if no image is provided byt the user
     },
     password : {
@@ -40,9 +39,8 @@ const UserModel_Schema = new mongoose.Schema({
     },
     watch_history : [
         {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "Videos",
-            required:true,
+            type:mongoose.Schema.Types.ObjectId,
+            ref : "Video",
         }
     ],
     refreshToken : {

@@ -6,18 +6,15 @@ const Video_Schema  = new mongoose.Schema({
     video_file : {
         type : String, // cloudnary url
         required : true,
-        unique:true,
     }, 
     thumbnail : {
         type : String,
         required : true,
-        unique:true,
     },
     owner : {
         type : mongoose.Schema.Types.ObjectId,
         ref : "User_Model",
         required : true,
-        unique : true,
     },
     tittle : {
         type : String,

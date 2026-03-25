@@ -417,7 +417,7 @@ const getWatchHistory = asyncHandler_2(async function(req , res , next) {
                             from : "user_models",
                             localField : "owner",
                             foreignField : "_id",
-                            as : "owner",
+                            as : "owner_info",
                             pipeline : [
                                 {
                                     $project : {
@@ -433,16 +433,17 @@ const getWatchHistory = asyncHandler_2(async function(req , res , next) {
                     },
                     {
                         $addFields :{
-                            owner : {$first : "$owner"}
+                            owner : {$first : "$owner_info"}
                         }
                     }
                 ]
             }
-        }
+        },
     ])
 
     return res.status(200).json(
-        new APIresponse(200 , user_refrence[0].watched_Videos , "History fetched successfully")
+        new APIresponse(200 , "History fetched successfully",user_refrence[0].watch_history
+        )
     )
 })
 export {registerUser ,
