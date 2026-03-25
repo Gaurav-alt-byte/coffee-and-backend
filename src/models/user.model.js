@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose"
+import mongoose, { mongo, Mongoose } from "mongoose"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt";
 
@@ -45,8 +45,7 @@ const UserModel_Schema = new mongoose.Schema({
     ],
     refreshToken : {
         type : String,
-    }
-
+    },
 } , {timestamps : true});
 
 // we cannot directly encrypt the password so that why we use the mongoose hooks

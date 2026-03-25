@@ -358,6 +358,24 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
             }
         },
         {
+            $lookup :{
+                from:"videos",
+                localField:"_id",
+                foreignField :"owner",
+                as : "uploads",
+                pipeline : [
+                    {
+                        $project :{
+                            _id:1,
+                            thumbnail:1,
+                            tittle:1,
+                            createdAt:1,
+                        }
+                    }
+                ]
+            }
+        },
+        {
             $addFields : {
                 SubscribersCount: {
                     $size : "$Subscribers",
@@ -371,7 +389,7 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
                         then : true,
                         else : false,
                     }
-                }
+                },
             }
         },
         {
@@ -384,6 +402,7 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
                 SubscribersCount:1,
                 isSubscribed:1,
                 username :1,
+                uploads:1,
             }
         }
     ])
@@ -393,7 +412,7 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
         throw new APIError(404 , "User not found")
     }
     return res.status(200).json(
-        new APIresponse(200 , channel[0] , "user channel fetched successfully")
+        new APIresponse(200 ,"user fetched successfully" , channel[0])
     )
 });
 
