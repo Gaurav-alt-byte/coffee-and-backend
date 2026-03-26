@@ -28,6 +28,7 @@ import Videorouter from "./routes/video.routes.js"
 
 import Likerouter from "./routes/like.routes.js"
 import subscriberouter from "./routes/subscribe.route.js"
+import tweetrouter from "./routes/tweet.route.js"
 
 
 // routes declaration 
@@ -36,4 +37,5 @@ app.use("/api/v1/users" , Userrouter);
 app.use("/api/v1/videos" , Videorouter);
 app.use("/api/v1/likes" , Likerouter);
 app.use("/api/v1/Subscriptions" , subscriberouter);
+app.use("/api/v1/Twitter" , tweetrouter);
 export {app}

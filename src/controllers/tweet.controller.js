@@ -1,7 +1,8 @@
-import asyncHandler_2 from "../utils/asyncHandler"
-import {APIError} from "../utils/APIError"
-import { Tweets } from "../models/tweets.model"
-import {APIresponse} from "../utils/APIresponse"
+import {asyncHandler_2} from "../utils/asyncHandler.js"
+import {APIError} from "../utils/APIError.js"
+import { Tweets } from "../models/tweets.model.js"
+import {APIresponse} from "../utils/APIresponse.js"
+import mongoose from "mongoose"
 const createTweet = asyncHandler_2(async function (req, res, next)
 {
     if(!req.user)
@@ -16,6 +17,7 @@ const createTweet = asyncHandler_2(async function (req, res, next)
     const tweet_refrence = await Tweets.create({
         tittle : tittle,
         main_content : main_content,
+        owner:req.user._id,
     });
     if(!tweet_refrence)
     {
