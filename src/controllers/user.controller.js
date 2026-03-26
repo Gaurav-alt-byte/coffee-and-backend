@@ -346,7 +346,14 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
                 from : "subscriptions",
                 localField :"_id",
                 foreignField : "channel",
-                as : "Subscribers"
+                as : "Subscribers",
+                pipeline :[
+                    {
+                        $match :{
+                            status:"Active",
+                        }
+                    }
+                ]
             }
         },
         {
@@ -355,6 +362,13 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
                 localField :"_id",
                 foreignField : "subscriber",
                 as : "SubscribedTo",
+                pipeline :[
+                    {
+                        $match : {
+                            status :"Active",
+                        }
+                    }
+                ]
             }
         },
         {
