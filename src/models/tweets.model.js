@@ -6,10 +6,19 @@ const Tweets_Schema = new mongoose.Schema({
         ref:"User_Model",
         required : true,
     },
-    content : {
+    tittle : {
+        type : String,
+        required:true,
+    },
+    main_content : {
         type : String,
         required : true,
     },
+    is_published : {
+        type : Boolean,
+        required:true,
+        default : true,
+    }
     
 }, {timestamps : true,});
 
