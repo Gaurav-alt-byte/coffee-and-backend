@@ -49,44 +49,6 @@ const video_uploader = asyncHandler_2(async function (req , res, next) {
     )
 })
 
-const viewUpdater = asyncHandler_2(async function(req , res , next) {
-
-    const{VideoId} =req.params;
-    if(!VideoId)
-    {
-        throw new APIError(404 , "Video not found")
-    }
-    const video_refrence = await Video.findByIdAndUpdate(VideoId ,
-        {
-            $inc : {
-                views:1
-            }
-        },
-        {
-            new : true,
-        }
-    )
-    if(!req.user)
-    {
-        return res.status(201).json(
-            new APIresponse(200 ,video_refrence , "views updated successfully")
-        )
-    }
-    const user_refrence = await User_Model.findByIdAndUpdate(req.user._id,
-        {
-            $addToSet :{
-                watch_history : VideoId,
-            }
-        },
-        {
-            new : true,
-        }
-    ).select("-password -refreshToken")
-    console.log(user_refrence);
-    return res.status(200).json(
-        new APIresponse(200 , {video_info : video_refrence , user_history : user_refrence.watch_history} ,"views and History Updated SuccessFully")
-    )
-})
 
 const feedGenerator = asyncHandler_2(async function(req , res, next){
     const Videos_avail = await (Video.find({is_published : true} )).sort({createdAt : -1}).populate("owner" , "username avatar").select("-video_file");
@@ -109,11 +71,11 @@ const allUploads = asyncHandler_2(async function (req, res, next) {
                     owner : new mongoose.Types.ObjectId(req.user._id)
                 }
             },
-            // {
-            //     $sort :{
-            //         createdAt : -1
-            //     }
-            // },
+            {
+                $sort :{
+                    createdAt : -1
+                }
+            },
             {
                 $lookup :{
                     from : "user_models",
@@ -228,6 +190,17 @@ const getVideoById = asyncHandler_2(async function(req ,res, next) {
     {
         throw new APIError(404 , "url not found");
     }
+
+    await Video.findByIdAndUpdate(VideoId ,
+        {
+            $inc : {
+                views:1
+            }
+        },
+        {
+            new : true,
+        }
+    )
     const video_refrence = await Video.aggregate([
         {
             $match :{
@@ -253,8 +226,35 @@ const getVideoById = asyncHandler_2(async function(req ,res, next) {
             },
         },
         {
+            $lookup :{
+                from :"comment_models",
+                foreignField : "commented_at",
+                localField : "_id",
+                as:"comments",
+                pipeline : [
+                    {
+                        $match : {
+                            OnModel:"Video"
+                        }
+                    },
+                    {
+                        $project : {
+                            content :1,
+                            createdAt:1,
+                            owner:1,
+                            like_counts:1,
+                        }
+                    }
+                ]
+            }
+        },
+        {
             $addFields :{
-                ownerDetails : {$first : "$owner_info"}
+                ownerDetails : {$first : "$owner_info"},
+                Comments : "$comments",
+                comment_count :{
+                    $size : "$comments",
+                }
             }
         },
         {
@@ -268,6 +268,8 @@ const getVideoById = asyncHandler_2(async function(req ,res, next) {
                 description:1,
                 views:1,
                 like_counts:1,
+                Comments:1,
+                comment_count:1,
             }
         }
     ])
@@ -318,7 +320,6 @@ const UpdateVideo = asyncHandler_2(async function (req, res, next){
 })
 export {
     video_uploader,
-    viewUpdater,
     feedGenerator,
     allUploads,
     togglepublishStatus,

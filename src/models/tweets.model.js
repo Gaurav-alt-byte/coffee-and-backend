@@ -18,6 +18,11 @@ const Tweets_Schema = new mongoose.Schema({
         type : Boolean,
         required:true,
         default : true,
+    },
+    like_counts :{
+        type:Number,
+        required:true,
+        default:0,   
     }
     
 }, {timestamps : true,});

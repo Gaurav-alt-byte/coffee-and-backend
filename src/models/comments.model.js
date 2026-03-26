@@ -1,5 +1,5 @@
 import mongoose, { MongooseError } from "mongoose";
-const comment_Schmea = new mongoose.Schema({
+const Comment_Schema = new mongoose.Schema({
     owner : {
         type : mongoose.Schema.Types.ObjectId,
         ref : "User_MOdel",
@@ -11,9 +11,20 @@ const comment_Schmea = new mongoose.Schema({
     },
     commented_at : {
         type : mongoose.Schema.Types.ObjectId,
-        ref: "Video",
+        refPath: "OnModel",
     },
+    OnModel :
+    {
+        type:String,
+        required:true,
+        enum : ["Video" , "Tweets"]
+    },
+    like_counts :{
+        type:Number,
+        default:0,
+        required:true,
+    }
 
 } ,{timestamps : true,});
 
-export const Comment_Model = mongoose.model("Comments" , comment_Schmea);
+export const Comment_Model = mongoose.model("Comment_Model" , Comment_Schema);
