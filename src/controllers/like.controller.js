@@ -64,7 +64,23 @@ const likingContent = asyncHandler_2(async function(req ,res, next) {
     )
 })
 
-
+const getlikedVideos = asyncHandler_2(async function(req, res, next){
+    if(!req.user)
+    {
+        throw new APIError(401 , "unauthorized access")
+    }
+    const liked_videos = await Like_Model.find({liked_by:req.user._id , OnModel : "Video"}).select("contend_id");
+    if(!liked_videos)
+    {
+        return res.status(200).json(
+            new APIresponse(200 , "Liked Videos Fetches Successfully")
+        )
+    }
+    return res.status(200).json(
+        new APIresponse(200 , "Liked Videos Fetched Successfully" , liked_videos)
+    )
+})
 export {
     likingContent,
+    getlikedVideos,
 }
