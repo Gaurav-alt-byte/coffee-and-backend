@@ -19,6 +19,11 @@ const Playlist_Schema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : "User_Model",
         required : true,
+    },
+    is_Private : {
+        type:Boolean,
+        default : false,
+        required:true,
     }
 
 } ,{timestamps : true});

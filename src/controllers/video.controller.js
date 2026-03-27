@@ -7,6 +7,7 @@ import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 import mongoose from "mongoose";
 import { User_Model } from "../models/user.model.js";
 import { file_delete } from "../utils/cloudinary_delete.js";
+import { getWatchHistory } from "./user.controller.js";
 
 const video_uploader = asyncHandler_2(async function (req , res, next) {
     const {tittle , description} = req.body;
@@ -50,17 +51,28 @@ const video_uploader = asyncHandler_2(async function (req , res, next) {
 })
 
 
-const feedGenerator = asyncHandler_2(async function(req , res, next){
-    const Videos_avail = await (Video.find({is_published : true} )).sort({createdAt : -1}).populate("owner" , "username avatar").select("-video_file");
-    console.log(Videos_avail);
-    if(!Videos_avail)
-    {
-        throw new APIError(500 , "internal server error feed load failed");
+const feedGenerator = asyncHandler_2(async function(req, res, next) {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const Videos_avail = await Video.find({ is_published: true })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("owner", "username avatar")
+        .select("-video_file")
+        .lean();
+
+    if (!Videos_avail) {
+        throw new APIError(500, "Internal server error");
     }
+
     return res.status(200).json(
-        new APIresponse(200 ,"feed fetched successfully" ,Videos_avail)
-    )
-})
+        new APIresponse(200, "Feed fetched successfully", Videos_avail)
+    );
+});
+
 
 const allUploads = asyncHandler_2(async function (req, res, next) {
     try
@@ -195,16 +207,27 @@ const getVideoById = asyncHandler_2(async function(req ,res, next) {
         {
             $inc : {
                 views:1
-            }
+            },
         },
         {
             new : true,
         }
     )
+    if(req.user)
+    {
+        await User_Model.findByIdAndUpdate(req.user._id,
+            {
+                $addToSet :{
+                    watch_history : VideoId,
+                }
+            }
+        )
+    }
     const video_refrence = await Video.aggregate([
         {
             $match :{
-                _id : new mongoose.Types.ObjectId(VideoId)
+                _id : new mongoose.Types.ObjectId(VideoId),
+                is_published:true,
             }
         },
         {

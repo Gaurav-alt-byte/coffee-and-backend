@@ -432,51 +432,57 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
 
 
 const getWatchHistory = asyncHandler_2(async function(req , res , next) {
-    const user_refrence = await User_Model.aggregate([
+    if(!req.user)
+    {
+        throw new APIError(401 , "Unauthorized access");
+    }
+    const User_history = await User_Model.aggregate([
         {
-            $match : {
-                _id : new mongoose.Types.ObjectId(req.user._id)
+            $match: {
+                _id : new mongoose.Types.ObjectId(req.user._id),
             }
         },
         {
-            $lookup:{
-                from:"videos",
-                localField : "watch_history",
-                foreignField: "_id",
-                as : "watched_Videos",
+            $lookup : {
+                from : "videos",
+                localField:"watch_history",
+                foreignField:"_id",
+                as : "history_info",
                 pipeline : [
                     {
-                        $lookup :{
-                            from : "user_models",
-                            localField : "owner",
-                            foreignField : "_id",
-                            as : "owner_info",
-                            pipeline : [
-                                {
-                                    $project : {
-                                        fullname:1,
-                                        email:1,
-                                        avatar:1,
-                                        cover_image:1,
-
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        $addFields :{
-                            owner : {$first : "$owner_info"}
+                        $project :{
+                            video_file :1,
+                            tittle:1,
+                            thumbnail:1,
+                            createdAt:1,
+                            views:1,
+                            like_counts:1,
+                            _id:1
                         }
                     }
                 ]
             }
         },
-    ])
+        {
+            $addFields :{
+                history_details : {$reverseArray : "$history_info"}
+            }
+        },
+        {
+            $project:{
+                history_details:1
+            }
+        }
 
-    return res.status(200).json(
-        new APIresponse(200 , "History fetched successfully",user_refrence[0].watch_history
+    ])
+    if(!User_history?.length)
+    {
+        return res.status(200).json(
+            new APIresponse(200 , "History fetched Successfully")
         )
+    }
+    return res.status(200).json(
+        new APIresponse(200 , "History fetched Successfully" , User_history[0])
     )
 })
 
