@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import {Comment_Model} from "../models/comments.model.js"
 import { APIError } from "../utils/APIError.js"
 import { APIresponse } from "../utils/APIresponse.js";
@@ -42,7 +43,7 @@ const comment_edit = asyncHandler_2(async function (req, res, next){
     {
         throw new APIError(401 , "UnauthorizedAccess");
     }
-    const{type} = req.query;
+    const{type} = req.body;
     const {CommentId} = req.params;
     if(!type || !CommentId)
     {
@@ -67,7 +68,132 @@ const comment_edit = asyncHandler_2(async function (req, res, next){
 })
 
 
+const getTweetReplies = asyncHandler_2(async function(req, res, next){
+    const type = "Tweets"
+    const {ContentId} = req.params;
+    if(!ContentId)
+    {
+        throw new APIError(401,"Bad request")
+    }
+    const all_replies = await Comment_Model.aggregate([
+        {
+            $match :{
+                commented_at:new mongoose.Types.ObjectId(ContentId),
+                OnModel:type,
+            }
+        },
+        {
+            $lookup : {
+                from : "user_models",
+                localField :"owner",
+                foreignField:"_id",
+                as :"user_info",
+                pipeline : [
+                    {
+                        $project :{
+                            username:1,
+                            cover_image:1,
+                            avatar:1,
+                            created_At:1
+                        }
+                    }
+                ]
+            }
+        },
+
+        {
+            $addFields: {
+                author: { $first: "$user_info" }
+            }
+        },
+
+        {
+            $project :{
+                content:1,
+                owner:1,
+                like_counts:1,
+                created_At:1,
+                update_At:1,
+                author:1
+            }
+        }
+    ])
+    if(!all_replies?.length)
+    {
+        return res.status(200).json(
+            new APIresponse(200 , "no replies found")
+        )
+    }
+    return res.status(200).json(
+        new APIresponse(200 , "all the replies fetched" , all_replies)
+    )
+})
+
+
+const getVideoComments = asyncHandler_2(async function(req, res, next){
+    const type = "Video"
+    const {ContentId} = req.params;
+    if(!ContentId)
+    {
+        throw new APIError(401,"Bad request")
+    }
+    const all_comments = await Comment_Model.aggregate([
+        {
+            $match :{
+                commented_at:new mongoose.Types.ObjectId(ContentId),
+                OnModel:type,
+            }
+        },
+        {
+            $lookup : {
+                from : "user_models",
+                localField :"owner",
+                foreignField:"_id",
+                as :"user_info",
+                pipeline : [
+                    {
+                        $project :{
+                            username:1,
+                            cover_image:1,
+                            avatar:1,
+                            created_At:1
+                        }
+                    }
+                ]
+            }
+        },
+
+        {
+            $addFields: {
+                author: { $first: "$user_info" }
+            }
+        },
+
+        {
+            $project :{
+                content:1,
+                owner:1,
+                like_counts:1,
+                created_At:1,
+                update_At:1,
+                author:1
+            }
+        }
+    ])
+    if(!all_comments?.length)
+    {
+        return res.status(200).json(
+            new APIresponse(200 , "no Comments found")
+        )
+    }
+    return res.status(200).json(
+        new APIresponse(200 , "all the Comments fetched" , all_comments)
+    )
+})
+
 export{
     comment_creator,
     comment_edit,
+    getTweetReplies,
+    getVideoComments,
 }

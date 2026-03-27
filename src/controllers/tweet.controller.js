@@ -170,9 +170,6 @@ const tweetFeedGenrator = asyncHandler_2(async function(req, res, next)
                 owner_details : {
                     $first : "$owner_info"
                 },
-                liked_counts : {
-                    $size : "$likes"
-                },
                 is_Liked: {
                     $cond: {
                         if: { $ne: [req.user?._id, undefined] },
@@ -191,7 +188,7 @@ const tweetFeedGenrator = asyncHandler_2(async function(req, res, next)
                 owner_details:1,
                 createdAt:1,
                 updatedAt :1,
-                liked_counts:1,
+                like_counts:1,
                 is_Liked : 1
             }
         }
@@ -206,9 +203,26 @@ const tweetFeedGenrator = asyncHandler_2(async function(req, res, next)
         new APIresponse(200 , "feed fetched successfully" , all_tweets)
     )
 })
+
+const getTweetById = asyncHandler_2(async function(req, res, next){
+    const{TweetId} = req.params;
+    if(!TweetId)
+    {
+        throw new APIError(401 , "Bad Request");
+    }
+    const tweet_refrence = await Tweets.findById(TweetId);
+    if(!tweet_refrence)
+    {
+        throw new APIError(404 , "Tweet not found");
+    }
+    return res.status(200).json(
+        new APIresponse(200,"Tweet Fetched Successfully",tweet_refrence)
+    )
+})
 export {
     createTweet,
     delete_Tweet,
     modify_tweet,
     tweetFeedGenrator,
+    getTweetById
 }

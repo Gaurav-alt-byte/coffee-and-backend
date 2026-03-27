@@ -226,35 +226,8 @@ const getVideoById = asyncHandler_2(async function(req ,res, next) {
             },
         },
         {
-            $lookup :{
-                from :"comment_models",
-                foreignField : "commented_at",
-                localField : "_id",
-                as:"comments",
-                pipeline : [
-                    {
-                        $match : {
-                            OnModel:"Video"
-                        }
-                    },
-                    {
-                        $project : {
-                            content :1,
-                            createdAt:1,
-                            owner:1,
-                            like_counts:1,
-                        }
-                    }
-                ]
-            }
-        },
-        {
             $addFields :{
                 ownerDetails : {$first : "$owner_info"},
-                Comments : "$comments",
-                comment_count :{
-                    $size : "$comments",
-                }
             }
         },
         {
@@ -268,8 +241,6 @@ const getVideoById = asyncHandler_2(async function(req ,res, next) {
                 description:1,
                 views:1,
                 like_counts:1,
-                Comments:1,
-                comment_count:1,
             }
         }
     ])
