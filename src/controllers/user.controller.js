@@ -510,6 +510,37 @@ const clearHistory = asyncHandler_2(async function(req, res, next){
     )
 })
 
+const searchUsers = asyncHandler_2(async (req, res) => {
+    const { q } = req.query;
+
+    if (!q) {
+        throw new APIError(400, "Search query is required");
+    }
+
+    const users = await User_Model.aggregate([
+        {
+            $match: {
+                $or: [
+                    { username: { $regex: q, $options: "i" } },
+                    { fullname: { $regex: q, $options: "i" } }
+                ]
+            }
+        },
+        {
+            $project: {
+                username: 1,
+                fullname: 1,
+                avatar: 1,
+                cover_image: 1,
+                // Add subscriber count if you want to show it in search results
+            }
+        }
+    ]);
+
+    return res.status(200).json(
+        new APIresponse(200, "Users fetched successfully", users)
+    );
+});
 export {registerUser ,
     login_user,
     logoutuser,
@@ -522,4 +553,5 @@ export {registerUser ,
     getuserchannelprofile,
     getWatchHistory,
     clearHistory,
+    searchUsers,
 };

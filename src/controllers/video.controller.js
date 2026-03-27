@@ -312,6 +312,46 @@ const UpdateVideo = asyncHandler_2(async function (req, res, next){
         new APIresponse(200 , "video Details are updated successfully",video_refrence)
     )
 })
+
+const searchVideos = asyncHandler_2(async (req, res) => {
+    const { q } = req.query; // 'q' is the industry standard for 'query'
+
+    if (!q) {
+        throw new APIError(400, "Search query is required");
+    }
+
+    const videos = await Video.aggregate([
+        {
+            $match: {
+                $or: [
+                    { tittle: { $regex: q, $options: "i" } },
+                    { description: { $regex: q, $options: "i" } }
+                ],
+                is_published: true
+            }
+        },
+        {
+            $lookup: {
+                from: "user_models",
+                localField: "owner",
+                foreignField: "_id",
+                as: "ownerDetails",
+                pipeline: [
+                    { $project: { username: 1, avatar: 1, fullname: 1 } }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                ownerDetails: { $first: "$ownerDetails" }
+            }
+        }
+    ]);
+
+    return res.status(200).json(
+        new APIresponse(200, "Search results fetched successfully", videos)
+    );
+});
 export {
     video_uploader,
     feedGenerator,
@@ -320,4 +360,5 @@ export {
     VideoDelete,
     getVideoById,
     UpdateVideo,
+    searchVideos,
 }
