@@ -10,5 +10,5 @@ router.route("/user/:PlaylistId/:VideoId/add").patch(authentication , addVideo);
 router.route("/user/:PlaylistId/:VideoId/remove").patch(authentication , removeVideo);
 router.route("/user/:PlaylistId/view").get(authentication , getPlaylistById);
 router.route("/user/playlist/all").get(authentication,allplaylist);
-router.route("/user/:PlaylsitId/delete").delete(authentication , DeletePlaylist)
+router.route("/user/:PlaylistId/delete").post(authentication , DeletePlaylist)
 export default router;

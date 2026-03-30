@@ -24,7 +24,7 @@ const createTweet = asyncHandler_2(async function (req, res, next)
         throw new APIError(500 , "internal server erorr Tweet creation failed");
     }
     return res.status(200).json(
-        new APIresponse(200 ,"Tweet created Successfully")
+        new APIresponse(200 ,"Tweet created Successfully" , tweet_refrence)
     )
 })
 

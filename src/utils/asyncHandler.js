@@ -21,6 +21,7 @@ const asyncHandler_2 = (requestHandler)=>{
         }
         catch(error)
         {
+            console.log(error.message)
             next(error);
         }
     }

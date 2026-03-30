@@ -32,9 +32,9 @@ const create_playlist = asyncHandler_2(async function(req, res, next){
 const DeletePlaylist = asyncHandler_2(async function(req , res, next) {
     if(!req.user)
     {
-        throw new APIError(401 , "Unauthorized Access");
+        throw new APIError(400 , "Unauthorized Access");
     }
-    const{PlaylistId} = req.body;
+    const{PlaylistId} = req.params;
     if(!PlaylistId)
     {
         throw new APIError(401  ,"Bad request");
