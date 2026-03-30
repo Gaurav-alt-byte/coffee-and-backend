@@ -9,21 +9,21 @@ const authentication = asyncHandler_2(async function(req, res , next) {
         const token_string = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer " ,"");
         if(!token_string)
         {
-            throw new APIError(404 , "invalid access");
+            throw new APIError(401 , "invalid access");
         }
         const decoded_token = jwt.verify(token_string , process.env.ACCESS_TOKEN_SECRET);
 
         const user_from_db = await User_Model.findById(decoded_token?._id).select("-password -refreshToken");
         if(!user_from_db)
         {
-            throw new APIError(500 , "invalid Token");
+            throw new APIError(401 , "invalid Token");
         }
         req.user = user_from_db;
         next();
     }
     catch(error)
     {
-        throw new APIError(500 , "internal server error");
+        throw new APIError(401, error.message ||"something went wrong");
     }
 })
 
