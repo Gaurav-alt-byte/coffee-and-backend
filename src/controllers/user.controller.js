@@ -243,7 +243,7 @@ const updateaccountDetails = asyncHandler_2(async function (req , res , next){
     {
         throw new APIError(401 ,"all the fileds are required");
     }
-    const user_refrence = User_Model.findByIdAndUpdate(req.user._id , 
+    const user_refrence =  await User_Model.findByIdAndUpdate(req.user._id , 
         {
             $set : {
                 fullname:fullname,
