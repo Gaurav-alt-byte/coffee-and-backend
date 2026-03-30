@@ -5,6 +5,7 @@ import { fileUploader } from "../utils/cloudinary.js"
 import { APIresponse } from "../utils/APIresponse.js"
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
+import nodemon from "nodemon"
 
 
 const accessandrefreshgenerator = async function (user_id){
@@ -137,6 +138,8 @@ const login_user = asyncHandler_2(async(req ,res, next) =>{
     const options = {
         httpOnly : true,
         secure : true,
+        sameSite:"none",
+        path:"/"
     }
     return res.status(200).cookie("accessToken" , access_token , options)
     .cookie("refreshToken" ,refresh_token , options).json(
@@ -161,6 +164,8 @@ const logoutuser = asyncHandler_2(async function(req , res, next) {
     const options = {
         httpOnly : true,
         secure : true,
+        sameSite:"none",
+        path:"/"
     }
     return res
     .status(201)
@@ -198,6 +203,8 @@ const refreshaccesstoken = asyncHandler_2(async function(req , res , next) {
 
             httpOnly : true,
             secure : true,
+            sameSite:"none",
+            path:"/"
         }
         const {access_token , new_refresh_token} = await accessandrefreshgenerator(user_refrence._id);
         return res.status(200)
