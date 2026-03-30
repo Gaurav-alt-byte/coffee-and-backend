@@ -233,7 +233,7 @@ const changecurrentpassword = asyncHandler_2(async function (req , res , next) {
 const getUser = asyncHandler_2(async function (req,res, next) {
     const user_refrence = await User_Model.findById(req.user._id).select("-password -refreshToken")
     return res.status(200).json(
-        new APIresponse(200 , user_refrence , "current user is fetched successfully")
+        new APIresponse(200 ,"current user is fetched successfully" , user_refrence)
     )
 })
 
