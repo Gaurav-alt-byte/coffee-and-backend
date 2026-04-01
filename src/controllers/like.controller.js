@@ -86,7 +86,7 @@ const getLikesOnContent = asyncHandler_2(async function (req ,res, next){
     ])
     const total_likes = Likes?.length;
     return res.status(200).json(
-        new APIresponse(200 , "like count fetched successfully") , {likes_count : total_likes , user_ids:Likes}
+        new APIresponse(200 , "like count fetched successfully" , {likes_count : total_likes , user_ids:Likes})
     )
 })
 export {

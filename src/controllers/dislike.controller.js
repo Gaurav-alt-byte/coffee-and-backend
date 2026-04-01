@@ -85,7 +85,7 @@ const getdisLikesOnContent = asyncHandler_2(async function (req ,res, next){
     ])
     const total_dislikes = disLikes?.length;
     return res.status(200).json(
-        new APIresponse(200 , "like count fetched successfully") , {dislikes_count : total_dislikes , user_ids:disLikes}
+        new APIresponse(200 , "like count fetched successfully" , {dislikes_count : total_dislikes , user_ids:disLikes})
     )
 })
 export {

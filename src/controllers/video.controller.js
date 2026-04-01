@@ -36,7 +36,6 @@ const video_uploader = asyncHandler_2(async function (req , res, next) {
         duration : video_duration,
         is_published:true,
         views:0,
-        like_counts:1,
 
     });
     console.log(created_video);
