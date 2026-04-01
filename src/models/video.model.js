@@ -42,11 +42,6 @@ const Video_Schema  = new mongoose.Schema({
         type : Boolean,
         required:true,
     },
-    like_counts : {
-        type:Number,
-        required:true,
-        default:0,
-    },
 } , {timestamps : true});
 
 Video_Schema.plugin(mongooseAggregatePaginate);

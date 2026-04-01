@@ -119,7 +119,6 @@ const allUploads = asyncHandler_2(async function (req, res, next) {
                     video_file:1,
                     views:1,
                     duration:1,
-                    like_counts:1,
                 }
             }
         ])
@@ -263,7 +262,6 @@ const getVideoById = asyncHandler_2(async function(req ,res, next) {
                 tittle:1,
                 description:1,
                 views:1,
-                like_counts:1,
             }
         }
     ])

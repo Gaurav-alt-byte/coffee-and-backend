@@ -19,11 +19,6 @@ const Comment_Schema = new mongoose.Schema({
         required:true,
         enum : ["Video" , "Tweets"]
     },
-    like_counts :{
-        type:Number,
-        default:0,
-        required:true,
-    }
 
 } ,{timestamps : true,});
 

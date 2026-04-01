@@ -111,7 +111,6 @@ const getTweetReplies = asyncHandler_2(async function(req, res, next){
             $project :{
                 content:1,
                 owner:1,
-                like_counts:1,
                 created_At:1,
                 update_At:1,
                 author:1
@@ -173,7 +172,6 @@ const getVideoComments = asyncHandler_2(async function(req, res, next){
             $project :{
                 content:1,
                 owner:1,
-                like_counts:1,
                 created_At:1,
                 update_At:1,
                 author:1

@@ -178,6 +178,9 @@ const tweetFeedGenrator = asyncHandler_2(async function(req, res, next)
                         },
                         else: false
                     }
+                },
+                likes_count : {
+                    $size :"$likes",
                 }
             }
         },
@@ -188,8 +191,8 @@ const tweetFeedGenrator = asyncHandler_2(async function(req, res, next)
                 owner_details:1,
                 createdAt:1,
                 updatedAt :1,
-                like_counts:1,
-                is_Liked : 1
+                is_Liked : 1,
+                likes_count:1,
             }
         }
     ])

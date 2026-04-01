@@ -22,19 +22,13 @@ const likingContent = asyncHandler_2(async function(req ,res, next) {
     )
     if(existing_like)
     {
-        const removed_like = await Like_Model.findByIdAndDelete(existing_like._id);
-        await  mongoose.model(type).findByIdAndUpdate(Content_Id , 
-            {
-                $inc :{
-                    like_counts : -1,
-                }
-            },
-            {
-                new : true,
-            }
-        )
+        const delete_refrence = await Like_Model.findByIdAndDelete(existing_like._id);
+        if(!delete_refrence)
+        {
+            throw new APIError(500 ,"error while removing the like from Content");
+        }
         return res.status(200).json(
-            new APIresponse(200 , "like removed successfully" , removed_like)
+            new APIresponse(200 , "like removed successfully")
         )
     }
     const created_like = await Like_Model.create(
@@ -42,17 +36,6 @@ const likingContent = asyncHandler_2(async function(req ,res, next) {
             content_id:Content_Id,
             OnModel:type,
             liked_by:req.user._id,
-        }
-    )
-
-    await mongoose.model(type).findByIdAndUpdate(Content_Id, 
-        {
-            $inc :{
-                like_counts: 1,
-            }
-        },
-        {
-            new:true,
         }
     )
     if(!created_like)
@@ -69,7 +52,7 @@ const getlikedVideos = asyncHandler_2(async function(req, res, next){
     {
         throw new APIError(401 , "unauthorized access")
     }
-    const liked_videos = await Like_Model.find({liked_by:req.user._id , OnModel : "Video"}).select("contend_id");
+    const liked_videos = await Like_Model.find({liked_by:req.user._id , OnModel : "Video"}).select("content_id");
     if(!liked_videos)
     {
         return res.status(200).json(
@@ -80,7 +63,34 @@ const getlikedVideos = asyncHandler_2(async function(req, res, next){
         new APIresponse(200 , "Liked Videos Fetched Successfully" , liked_videos)
     )
 })
+
+const getLikesOnContent = asyncHandler_2(async function (req ,res, next){
+    const {ContentId} = req.params;
+    if(!ContentId)
+    {
+        throw new APIError(401 , "Bad request");
+    }
+    const{type} = req.body;
+    const Likes =  await Like_Model.aggregate([
+        {
+            $match :{
+                OnModel:type,
+                content_id:new mongoose.Types.ObjectId(ContentId),
+            }
+        },
+        {
+            $project:{
+                liked_by:1,
+            }
+        }
+    ])
+    const total_likes = Likes?.length;
+    return res.status(200).json(
+        new APIresponse(200 , "like count fetched successfully") , {likes_count : total_likes , user_ids:Likes}
+    )
+})
 export {
     likingContent,
     getlikedVideos,
+    getLikesOnContent,
 }
