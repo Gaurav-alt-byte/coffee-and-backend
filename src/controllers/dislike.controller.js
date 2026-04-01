@@ -3,9 +3,11 @@ import {DisLike_Model} from "../models/dislike.model.js"
 import { APIError } from "../utils/APIError.js";
 import { APIresponse } from "../utils/APIresponse.js";
 import {asyncHandler_2} from "../utils/asyncHandler.js"
+import { Like_Model } from "../models/like.model.js";
 
 
 const dislikingContent = asyncHandler_2(async function(req ,res, next) {
+    if (!req.user?._id) throw new APIError(401, "You must be logged in");
     const{Content_Id} = req.params;
     const {type} = req.body;
     if(!Content_Id || !type)
@@ -30,6 +32,7 @@ const dislikingContent = asyncHandler_2(async function(req ,res, next) {
             new APIresponse(200 , "dislike removed successfully")
         )
     }
+    const existing_like = await Like_Model.findOneAndDelete({liked_by : req.user._id , content_id : Content_Id , OnModel : type})
     const created_Dislike = await DisLike_Model.create(
         {
             content_id:Content_Id,
