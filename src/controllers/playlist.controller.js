@@ -156,11 +156,45 @@ const allplaylist = asyncHandler_2(async function(req, res, next) {
     );
 });
 
+
+const editPlaylist = asyncHandler_2(async function(req, res, next){
+    if(!req.user)
+    {
+        throw new APIError(401 , "Unauthorized access")
+    }
+    const{PlaylistId} = req.params;
+    if(!PlaylistId)
+    {
+        throw new APIError(400 , "Bad request");
+    }
+    const {name , description , is_private} = req.body;
+    const playlist_refrence =  await Playlist.findOneAndUpdate({owner : req.user._id , _id : PlaylistId} ,
+        {
+            $set:{
+                name : name,
+                description:description,
+                is_private:is_private,
+            }
+        },
+        {
+            new : true,
+            runValidators:false,
+        }
+    )
+    if(!playlist_refrence)
+    {
+        throw new APIError(404 ,"no playlist found or you are not the owner")
+    }
+    return res.status(200).json(
+        new APIresponse(200 , "playlist updated successfully" , playlist_refrence)
+    )
+})
 export {
     create_playlist,
     addVideo,
     removeVideo,
     getPlaylistById,
     allplaylist,
-    DeletePlaylist
+    DeletePlaylist,
+    editPlaylist,
 };
