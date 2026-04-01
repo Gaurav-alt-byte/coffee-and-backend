@@ -189,9 +189,53 @@ const getVideoComments = asyncHandler_2(async function(req, res, next){
     )
 })
 
+const delete_comment = asyncHandler_2(async function (req, res, next){
+    if(!req.user)
+    {
+        throw new APIError(401 , "Unauthorized access")
+    }
+    const {CommentId} = req.params;
+    const type = "Video";
+    if(!CommentId || !type)
+    {
+        throw new APIError(400 ,"Bad request");
+    }
+    const comment_refrence = await Comment_Model.findOneAndDelete({_id : CommentId , owner : req.user._id , OnModel : type});
+    if(!comment_refrence)
+    {
+        throw new APIError(404 , "comment not found");
+    }
+    return res.status(200).json(
+        new APIresponse(200 , "Comment delted successfully" , comment_refrence)
+    )
+})
+
+
+const deleteTweetReply = asyncHandler_2(async function (req, res, next){
+    if(!req.user)
+    {
+        throw new APIError(401 , "Unauthorized access")
+    }
+    const {TweetId} = req.params;
+    const type = "Tweets";
+    if(!TweetId || !type)
+    {
+        throw new APIError(400 ,"Bad request");
+    }
+    const comment_refrence = await Comment_Model.findOneAndDelete({_id : TweetId , owner : req.user._id , OnModel : type});
+    if(!comment_refrence)
+    {
+        throw new APIError(404 , "comment not found");
+    }
+    return res.status(200).json(
+        new APIresponse(200 , "Comment delted successfully" , comment_refrence)
+    )
+})
 export{
     comment_creator,
     comment_edit,
     getTweetReplies,
     getVideoComments,
+    delete_comment,
+    deleteTweetReply,
 }
