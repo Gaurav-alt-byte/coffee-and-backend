@@ -8,7 +8,7 @@ const router = Router();
 
 router.route("/toggle/:Content_Id").post(authentication , likingContent)
 router.route("/liked-videos").get(authentication , getlikedVideos)
-router.route("/likes-count/:ContentId").get(getLikesOnContent);
+router.route("/likes-count/:ContentId").post(getLikesOnContent);
 
 
 export default router;
