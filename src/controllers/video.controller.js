@@ -123,7 +123,9 @@ const allUploads = asyncHandler_2(async function (req, res, next) {
         ])
         if(!allUploads_video?.length)
         {
-            throw new APIError(404 , "user has not uploaded anything yet");
+            return res.status(200).json(
+                new APIresponse(200 , "no Videos uploaded yet")
+            )
         }
         console.log(allUploads_video);
         return res.status(200).json(
