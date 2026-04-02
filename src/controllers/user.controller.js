@@ -568,7 +568,7 @@ const verifyEmail = asyncHandler_2(async function (req, res) {
     }
 
     // Update user status
-    user.isVerified = true;
+    user.is_Verified = true;
     user.emailVerificationToken = undefined;
     user.emailVerificationExpiry = undefined;
     await user.save({ validateBeforeSave: false });
