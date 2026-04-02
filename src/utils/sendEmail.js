@@ -10,7 +10,7 @@ export const sendVerificationEmail = async (email, token) => {
         },
     });
 
-    const url = `${process.env.FRONTEND_URL}/verify-email/${token}`;
+    const url = `${process.env.FRONTEND_URL}/verify/${token}`;
 
     await transporter.sendMail({
         from: '"Cracked Tube" <verify@crackedtube.com>',
