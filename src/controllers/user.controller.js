@@ -325,7 +325,7 @@ const updateUserCoverImage = asyncHandler_2(async function (req, res, next) {
         const user_refrence = await User_Model.findByIdAndUpdate(req.user._id ,
             {
                 $set : {
-                    avatar : new_CoverImage_cloudinary.url,
+                    cover_image : new_CoverImage_cloudinary.url,
                 }
             },
 
