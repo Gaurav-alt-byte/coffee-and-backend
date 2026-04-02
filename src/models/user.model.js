@@ -52,6 +52,7 @@ const UserModel_Schema = new mongoose.Schema({
     },
     emailVerificationToken:{
         type : String,
+        index : true,
     },
     emailVerificationExpiry: {
         type:Date,

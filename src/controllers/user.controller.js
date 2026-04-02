@@ -88,7 +88,7 @@ const registerUser = asyncHandler_2(async(req , res , next) =>{
         email,
         password,
         emailVerificationToken:verificationToken,
-        emailVerificationExpiry : Date.now() + 3600000,
+        emailVerificationExpiry :  new Date (Date.now() + 3600000),
     });
     console.log(created_user);
     await sendVerificationEmail(created_user.email, verificationToken);
@@ -557,17 +557,15 @@ const searchUsers = asyncHandler_2(async (req, res) => {
 });
 const verifyEmail = asyncHandler_2(async function (req, res) {
     const { token } = req.params;
-
     const user = await User_Model.findOne({
         emailVerificationToken: token,
-        emailVerificationExpiry: { $gt: Date.now() }
+        emailVerificationExpiry: { $gt: new Date() }
     });
 
     if (!user) {
         throw new APIError(400, "Token is invalid or has expired");
     }
 
-    // Update user status
     user.is_Verified = true;
     user.emailVerificationToken = undefined;
     user.emailVerificationExpiry = undefined;
