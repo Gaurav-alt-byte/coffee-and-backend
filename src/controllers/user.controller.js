@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
 import crypto from "crypto"
 import nodemon from "nodemon"
-
+import {sendVerificationEmail} from "../utils/sendEmail.js" 
 
 const accessandrefreshgenerator = async function (user_id){
     try{
