@@ -49,13 +49,16 @@ const UserModel_Schema = new mongoose.Schema({
     is_Verified : {
         type : Boolean,
         default:false,
+        required:true
     },
     emailVerificationToken:{
         type : String,
         index : true,
+        required:true,
     },
     emailVerificationExpiry: {
         type:Date,
+        required:true,
     }
 } , {timestamps : true});
 
