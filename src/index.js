@@ -5,7 +5,7 @@ import { app } from "./app.js";
 import { asyncHandler_2 } from "./utils/asyncHandler.js";
 
 dotenv.config({
-    path:'./env'
+    path:'./.env'
 });
 connectDB().then(()=>{
     app.listen(process.env.PORT , () =>{

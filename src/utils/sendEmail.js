@@ -1,4 +1,3 @@
-
 import nodemailer from "nodemailer";
 
 export const sendVerificationEmail = async (email, token) => {
@@ -9,7 +8,6 @@ export const sendVerificationEmail = async (email, token) => {
             pass: process.env.EMAIL_PASS,
         },
     });
-
     const url = `${process.env.FRONTEND_URL}/verify/${token}`;
 
     await transporter.sendMail({
@@ -18,6 +16,9 @@ export const sendVerificationEmail = async (email, token) => {
         subject: "Verify your email address",
         html: `<h1>Welcome!</h1>
                <p>Please click the link below to verify your email:</p>
-               <a href="${url}">Verify Email</a>`,
+               <a href="${url}">Verify Email</a>
+               <br><br>
+               <p><strong>If the link above is unclickable, copy and paste this URL into your browser:</strong></p>
+               <p>${url}</p>`,
     });
 };
