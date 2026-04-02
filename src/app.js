@@ -46,4 +46,14 @@ app.use("/api/v1/Twitter" , tweetrouter);
 app.use("/api/v1/Comments" , commentrouter);
 app.use("/api/v1/Playlists" , playlistrouter);
 app.use("/api/v1/dislikes" ,dislikerouter );
+
+
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).json({
+        success: false,
+        message: err.message || "Internal Server Error",
+        errors: err.errors || [],
+    });
+});
 export {app}
