@@ -5,6 +5,7 @@ import { fileUploader } from "../utils/cloudinary.js"
 import { APIresponse } from "../utils/APIresponse.js"
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
+import crypto from "crypto"
 import nodemon from "nodemon"
 
 
@@ -51,8 +52,6 @@ const registerUser = asyncHandler_2(async(req , res , next) =>{
     {
         throw new APIError(400 , "Bad request");
     }
-
-
     // checking pre existence of the user 
     const existed_user = await User_Model.findOne({
         $or : [{username} , {email}],
@@ -62,6 +61,7 @@ const registerUser = asyncHandler_2(async(req , res , next) =>{
         throw new APIError(409 , "user preexisted in the system with same user name or same email");
     }
 
+    const verificationToken = crypto.randomBytes(32).toString("hex");
     const avatarlocalpath =req.files?.avatar[0]?.path;
     let coverimagelocalpath;
     if(req.files && Array.isArray(req.files.cover_image) && 0 < req.files.cover_image.length)
@@ -87,8 +87,11 @@ const registerUser = asyncHandler_2(async(req , res , next) =>{
         cover_image: cover_image_cloudinary?.url || "",
         email,
         password,
+        emailVerificationToken:verificationToken,
+        emailVerificationExpiry : Date.now() + 3600000,
     });
     console.log(created_user);
+    await sendVerificationEmail(created_user.email, verificationToken);
     const creation_check  = await User_Model.findById(created_user._id).select(
         "-password -refreshToken"
     );
@@ -127,6 +130,10 @@ const login_user = asyncHandler_2(async(req ,res, next) =>{
     if( !db_check)
     {
         throw new APIError("404" , "user not registered");
+    }
+    if(!db_check.is_Verified)
+    {
+        throw new APIError(403 , "please verify your email");
     }
     const password_check = await db_check.isPasswordCorrect(password);
     if(!password_check)
@@ -548,6 +555,28 @@ const searchUsers = asyncHandler_2(async (req, res) => {
         new APIresponse(200, "Users fetched successfully", users)
     );
 });
+const verifyEmail = asyncHandler_2(async function (req, res) {
+    const { token } = req.params;
+
+    const user = await User_Model.findOne({
+        emailVerificationToken: token,
+        emailVerificationExpiry: { $gt: Date.now() }
+    });
+
+    if (!user) {
+        throw new APIError(400, "Token is invalid or has expired");
+    }
+
+    // Update user status
+    user.isVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpiry = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json(
+        new APIresponse(200, "Email verified successfully", {})
+    );
+});
 export {registerUser ,
     login_user,
     logoutuser,
@@ -561,4 +590,5 @@ export {registerUser ,
     getWatchHistory,
     clearHistory,
     searchUsers,
+    verifyEmail
 };

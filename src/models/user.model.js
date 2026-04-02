@@ -46,6 +46,12 @@ const UserModel_Schema = new mongoose.Schema({
     refreshToken : {
         type : String,
     },
+    is_Verified : {
+        type : Boolean,
+        default:false,
+    },
+    emailVerificationToken:String,
+    emailVerificationExpiry:Date,
 } , {timestamps : true});
 
 // we cannot directly encrypt the password so that why we use the mongoose hooks
