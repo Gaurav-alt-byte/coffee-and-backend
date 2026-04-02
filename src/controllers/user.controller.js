@@ -100,7 +100,7 @@ const registerUser = asyncHandler_2(async(req , res , next) =>{
         throw new APIError(500 , "internal server error");
     }
     return res.status(200).json(
-        new APIresponse(200 ,creation_check, "user created successfully")
+        new APIresponse(200  ,"user registered success fully" , creation_check)
     )
 })
 
@@ -269,7 +269,7 @@ const updateaccountDetails = asyncHandler_2(async function (req , res , next){
         }
     ).select("-password");
     return res.status(200).json(
-        new APIresponse(200 , user_refrence , "user details updated successfully")
+        new APIresponse(200 , "user details updated successfully" , user_refrence)
     )
 })
 
@@ -298,7 +298,7 @@ const UpdateUserAvatar = asyncHandler_2(async function (req , res , next) {
             }
         ).select("-password -refreshToken");
         return res.status(201).json(
-            new APIresponse(200 , user_refrence , "image updated successfully")
+            new APIresponse(200 ,"image updated successfully" , user_refrence)
         )
     }
     catch(error)
@@ -334,7 +334,7 @@ const updateUserCoverImage = asyncHandler_2(async function (req, res, next) {
             }
         ).select("-password -refreshToken");
         return res.status(201).json(
-            new APIresponse(200 , user_refrence , "image updated successfully")
+            new APIresponse(200 , "image updated successfully" , user_refrence)
         )
     }
     catch(error)
