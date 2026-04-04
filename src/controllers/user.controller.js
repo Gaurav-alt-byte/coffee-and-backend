@@ -398,6 +398,8 @@ const getuserchannelprofile = asyncHandler_2(async function (req , res, next) {
                             thumbnail:1,
                             tittle:1,
                             createdAt:1,
+                            views:1,
+                            duration:1,                         
                         }
                     }
                 ]
