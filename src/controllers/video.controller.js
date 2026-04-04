@@ -24,8 +24,8 @@ const video_uploader = asyncHandler_2(async function (req , res, next) {
         throw new APIError(500 ,"cloudinary upload failed")
     }
     console.log(cloudinary_video);
-    const cloudinary_video_url = cloudinary_video.url;
-    const cloudinary_thumbnail_url = cloudinary_thumbnail.url;
+    const cloudinary_video_url = cloudinary_video.secure_url;
+    const cloudinary_thumbnail_url = cloudinary_thumbnail.secure_url;
     const video_duration = cloudinary_video.duration;
     const created_video = await Video.create({
         tittle : tittle,
@@ -300,7 +300,7 @@ const UpdateVideo = asyncHandler_2(async function (req, res, next){
         {
             throw new APIError(500 , "image upload to cloudinary failed");
         }
-        updateThumbnail = cloudinary_new_thumbnail.url;
+        updateThumbnail = cloudinary_new_thumbnail.secure_url;
         const delete_response = await file_delete(old_thumbnail);
     }
     video_refrence.thumbnail = updateThumbnail;

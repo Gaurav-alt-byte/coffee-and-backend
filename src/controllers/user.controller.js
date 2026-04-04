@@ -83,8 +83,8 @@ const registerUser = asyncHandler_2(async(req , res , next) =>{
     const created_user =await User_Model.create({
         username:username.toLowerCase(),
         fullname,
-        avatar : avatar_cloudinary.url,
-        cover_image: cover_image_cloudinary?.url || "",
+        avatar : avatar_cloudinary.secure_url,
+        cover_image: cover_image_cloudinary?.secure_url || "",
         email,
         password,
         emailVerificationToken:verificationToken,
@@ -289,7 +289,7 @@ const UpdateUserAvatar = asyncHandler_2(async function (req , res , next) {
         const user_refrence = await User_Model.findByIdAndUpdate(req.user._id ,
             {
                 $set : {
-                    avatar : new_avatar_cloudinary.url,
+                    avatar : new_avatar_cloudinary.secure_url,
                 }
             },
 
@@ -325,7 +325,7 @@ const updateUserCoverImage = asyncHandler_2(async function (req, res, next) {
         const user_refrence = await User_Model.findByIdAndUpdate(req.user._id ,
             {
                 $set : {
-                    cover_image : new_CoverImage_cloudinary.url,
+                    cover_image : new_CoverImage_cloudinary.secure_url,
                 }
             },
 
