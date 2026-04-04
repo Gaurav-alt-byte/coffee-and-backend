@@ -73,7 +73,7 @@ const modify_tweet = asyncHandler_2(async function (req, res, next)
     {
         throw new APIError(404  ,"no Tweet found");
     }
-    const{new_tittle , new_main_content} = req.body;
+    let {new_tittle , new_main_content} = req.body;
     new_tittle = (new_tittle !== "" && new_tittle.trim() !== "")?new_tittle:tweet_refrence.tittle;
     new_main_content = (new_main_content.trim() !== "" && new_main_content !== "")?new_main_content.trim():tweet_refrence.main_content;
     tweet_refrence.tittle = new_tittle;
