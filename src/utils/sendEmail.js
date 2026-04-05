@@ -1,24 +1,17 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendVerificationEmail = async (email, token) => {
     try {
         console.log("Starting email send to:", email);
-        
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
 
         const url = `${process.env.FRONTEND_URL}/verify/${token}`;
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+        await resend.emails.send({
+            from: "CrackedTube <onboarding@resend.dev>",
             to: email,
             subject: "CrackedTube - Verify Your Email",
-            text: `Click here to verify: ${url}`,
             html: `<p><a href="${url}">Click here to verify your email</a></p>`,
         });
 
